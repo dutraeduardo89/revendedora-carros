@@ -1,0 +1,69 @@
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card p-4">
+      <h3 class="fw-bold mb-4">{{ isEdicao ? 'Editar Veículo' : 'Novo Veículo' }}</h3>
+      <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Placa</label>
+          <input type="text" class="form-control" [(ngModel)]="carro.placa">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Chassi</label>
+          <input type="text" class="form-control" [(ngModel)]="carro.chassi">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Cor</label>
+          <input type="text" class="form-control" [(ngModel)]="carro.cor">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Ano</label>
+          <input type="number" class="form-control" [(ngModel)]="carro.ano">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Valor (R$)</label>
+          <input type="number" class="form-control" [(ngModel)]="carro.valor">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-medium">Quilometragem</label>
+          <input type="number" class="form-control" [(ngModel)]="carro.quilometragem">
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-medium">Modelo</label>
+          <select class="form-select" [(ngModel)]="carro.id_modelo">
+            <option [ngValue]="null">Selecione um modelo</option>
+            <option *ngFor="let m of modelos" [ngValue]="m.id_modelo">{{ m.nome }} ({{ m.marca_nome }})</option>
+          </select>
+        </div>
+        <div class="col-md-6" *ngIf="isEdicao">
+          <label class="form-label fw-medium">Situação</label>
+          <select class="form-select" [(ngModel)]="carro.situacao">
+            <option value="D">Disponível</option>
+            <option value="V">Vendido</option>
+          </select>
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-3">Acessórios</h5>
+      <div class="row">
+        <div class="col-md-4 mb-2" *ngFor="let ac of acessorios">
+          <div class="form-check">
+            <!-- O ?. protege contra erro se a lista ainda estiver vazia -->
+            <input class="form-check-input" type="checkbox" [checked]="carro.acessorios?.includes(ac.id_acessorio)" (change)="toggleAcessorio(ac.id_acessorio)" id="ac{{ac.id_acessorio}}">
+            <label class="form-check-label" for="ac{{ac.id_acessorio}}">{{ ac.nome }}</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-4">
+      <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-light" (click)="cancelar()">Cancelar</button>
+        <button class="btn btn-primary" (click)="salvar()">Salvar Veículo</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="row">
+  <div class="col-12 mb-3">
+    <h2 class="fw-bold">Gerenciar Cadastros</h2>
+    <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
+  </div>
+
+  <!-- MARCAS -->
+  <div class="col-md-4 mb-4">
+    <div class="card p-3">
+      <h5 class="fw-bold text-primary">Marcas</h5>
+      <div class="input-group mb-2">
+        <input type="text" class="form-control form-control-sm" placeholder="Nome da marca" [(ngModel)]="novaMarca.nome">
+        <button class="btn btn-primary btn-sm" (click)="salvar('marca', novaMarca)">Add</button>
+      </div>
+      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroMarca">
+      <div class="table-responsive" style="max-height: 300px;">
+        <table class="table table-sm table-hover align-middle">
+          <thead><tr><th>ID</th><th>Nome</th><th class="text-end">Ações</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of filtrarM(marcas, filtroMarca, ['id_marca', 'nome'])">
+              <td>#{{ m.id_marca }}</td>
+              <td>{{ m.nome }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('marca', m.id_marca)"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODELOS -->
+  <div class="col-md-4 mb-4">
+    <div class="card p-3">
+      <h5 class="fw-bold text-primary">Modelos</h5>
+      <input type="text" class="form-control form-control-sm mb-2" placeholder="Nome do modelo" [(ngModel)]="novoModelo.nome">
+      <select class="form-select form-select-sm mb-2" [(ngModel)]="novoModelo.id_marca">
+        <option [ngValue]="null">Selecione a Marca</option>
+        <option *ngFor="let m of marcas" [ngValue]="m.id_marca">{{ m.nome }}</option>
+      </select>
+      <button class="btn btn-primary btn-sm mb-2" (click)="salvar('modelo', novoModelo)">Adicionar Modelo</button>
+      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroModelo">
+      <div class="table-responsive" style="max-height: 300px;">
+        <table class="table table-sm table-hover align-middle">
+          <thead><tr><th>ID</th><th>Nome</th><th>Marca</th><th class="text-end">Ações</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of filtrarM(modelos, filtroModelo, ['id_modelo', 'nome'])">
+              <td>#{{ m.id_modelo }}</td>
+              <td>{{ m.nome }}</td>
+              <td><small>{{ m.marca_nome }}</small></td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('modelo', m.id_modelo)"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACESSÓRIOS -->
+  <div class="col-md-4 mb-4">
+    <div class="card p-3">
+      <h5 class="fw-bold text-primary">Acessórios</h5>
+      <div class="input-group mb-2">
+        <input type="text" class="form-control form-control-sm" placeholder="Nome do acessório" [(ngModel)]="novoAcessorio.nome">
+        <button class="btn btn-primary btn-sm" (click)="salvar('acessorio', novoAcessorio)">Add</button>
+      </div>
+      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroAcessorio">
+      <div class="table-responsive" style="max-height: 300px;">
+        <table class="table table-sm table-hover align-middle">
+          <thead><tr><th>ID</th><th>Nome</th><th class="text-end">Ações</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let a of filtrarM(acessorios, filtroAcessorio, ['id_acessorio', 'nome'])">
+              <td>#{{ a.id_acessorio }}</td>
+              <td>{{ a.nome }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('acessorio', a.id_acessorio)"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

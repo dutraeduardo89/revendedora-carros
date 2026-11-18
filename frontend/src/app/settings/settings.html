@@ -1,0 +1,24 @@
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h3 class="fw-bold mb-4 text-center">Configurações</h3>
+      <p class="text-muted text-center mb-4">Gerencie sua credencial de acesso.</p>
+      
+      <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
+
+      <div class="mb-3">
+        <label class="form-label fw-medium">Senha Atual</label>
+        <input type="password" class="form-control" [(ngModel)]="senhaAtual">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-medium">Nova Senha</label>
+        <input type="password" class="form-control" [(ngModel)]="novaSenha">
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-medium">Confirmar Nova Senha</label>
+        <input type="password" class="form-control" [(ngModel)]="confirmarSenha">
+      </div>
+      <button class="btn btn-primary w-100" (click)="salvarSenha()">Atualizar Senha</button>
+    </div>
+  </div>
+</div>

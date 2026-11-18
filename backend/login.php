@@ -4,11 +4,12 @@ require 'config.php';
 $data = json_decode(file_get_contents("php://input"));
 
 if (!empty($data->login) && !empty($data->senha)) {
-    $stmt = $pdo->prepare("SELECT * FROM tb_usuario WHERE login = :login AND senha = :senha");
-    $stmt->execute(['login' => $data->login, 'senha' => $data->senha]);
+    $stmt = $pdo->prepare("SELECT * FROM tb_usuario WHERE login = :login");
+    $stmt->execute(['login' => $data->login]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
+    // Verifica a senha usando a função correta do PHP
+    if ($user && password_verify($data->senha, $user['senha'])) {
         echo json_encode(["message" => "Login realizado com sucesso", "user" => $user['login']]);
     } else {
         http_response_code(401);
