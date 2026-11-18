@@ -6,8 +6,8 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 $host = 'localhost';
 $dbname = 'bd_revendedoracarros';
-$user = 'root'; // Coloque seu usuario do MySQL aqui
-$pass = '';     // Coloque sua senha do MySQL aqui (no XAMPP geralmente é vazio)
+$user = 'admin_carros'; // Usuário criado
+$pass = 'Admin@123';    // Senha forte exigida pelo MySQL 9.7
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
