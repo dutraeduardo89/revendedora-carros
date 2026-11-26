@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'cadastrar', component: CarFormComponent, canActivate: [AuthGuard] },
-  { path: 'cadastros', component: CadastrosComponent, canActivate: [AuthGuard] },
+  { path: 'cadastros', pathMatch: 'full', redirectTo: 'cadastros/marcas' },
+  { path: 'cadastros/:secao', component: CadastrosComponent, canActivate: [AuthGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] }
 ];

@@ -1,69 +1,192 @@
 <div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card p-4">
-      <h3 class="fw-bold mb-4">{{ isEdicao ? 'Editar Veículo' : 'Novo Veículo' }}</h3>
-      <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
-      
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Placa</label>
-          <input type="text" class="form-control" [(ngModel)]="carro.placa">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Chassi</label>
-          <input type="text" class="form-control" [(ngModel)]="carro.chassi">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Cor</label>
-          <input type="text" class="form-control" [(ngModel)]="carro.cor">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Ano</label>
-          <input type="number" class="form-control" [(ngModel)]="carro.ano">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Valor (R$)</label>
-          <input type="number" class="form-control" [(ngModel)]="carro.valor">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-medium">Quilometragem</label>
-          <input type="number" class="form-control" [(ngModel)]="carro.quilometragem">
-        </div>
+  <div class="col-xl-10">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+      <div>
+        <h2 class="fw-bold mb-1">{{ idCarro ? 'Editar veículo' : 'Novo veículo' }}</h2>
+        <p class="text-muted mb-0">Ano de fabricação e ano-modelo são independentes. A classificação usa quilometragem, idade e conservação.</p>
       </div>
+      <button type="button" class="btn btn-light" (click)="cancelar()">Voltar</button>
+    </div>
 
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <label class="form-label fw-medium">Modelo</label>
-          <select class="form-select" [(ngModel)]="carro.id_modelo">
-            <option [ngValue]="null">Selecione um modelo</option>
-            <option *ngFor="let m of modelos" [ngValue]="m.id_modelo">{{ m.nome }} ({{ m.marca_nome }})</option>
-          </select>
-        </div>
-        <div class="col-md-6" *ngIf="isEdicao">
-          <label class="form-label fw-medium">Situação</label>
-          <select class="form-select" [(ngModel)]="carro.situacao">
-            <option value="D">Disponível</option>
-            <option value="V">Vendido</option>
-          </select>
-        </div>
-      </div>
+    <div *ngIf="msg" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
 
-      <h5 class="fw-bold mb-3">Acessórios</h5>
-      <div class="row">
-        <div class="col-md-4 mb-2" *ngFor="let ac of acessorios">
-          <div class="form-check">
-            <!-- O ?. protege contra erro se a lista ainda estiver vazia -->
-            <input class="form-check-input" type="checkbox" [checked]="carro.acessorios?.includes(ac.id_acessorio)" (change)="toggleAcessorio(ac.id_acessorio)" id="ac{{ac.id_acessorio}}">
-            <label class="form-check-label" for="ac{{ac.id_acessorio}}">{{ ac.nome }}</label>
+    <div *ngIf="carregando" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div>
+    </div>
+
+    <form *ngIf="!carregando" (ngSubmit)="salvar()" novalidate>
+      <section class="card p-4 mb-3">
+        <h3 class="h5 fw-bold">Identificação</h3>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="marca">Marca</label>
+            <select id="marca" class="form-select" [(ngModel)]="idMarca" name="marca" (ngModelChange)="aoMudarMarca()">
+              <option [ngValue]="null">Selecione a marca</option>
+              <option *ngFor="let marca of marcas" [ngValue]="marca.id_marca">{{ marca.nome }}</option>
+            </select>
+            <p class="form-text mb-0" *ngIf="marcas.length === 0">Nenhuma marca cadastrada. <a routerLink="/cadastros/marcas">Cadastrar marca</a></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="modelo">Modelo</label>
+            <select id="modelo" class="form-select" [(ngModel)]="carro.id_modelo" name="id_modelo" [class.is-invalid]="erro('id_modelo')">
+              <option [ngValue]="null">Selecione o modelo</option>
+              <option *ngFor="let modelo of modelosFiltrados" [ngValue]="modelo.id_modelo">{{ modelo.nome }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('id_modelo') }}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="versao">Versão</label>
+            <input id="versao" class="form-control" name="versao" maxlength="80" [(ngModel)]="carro.versao" [class.is-invalid]="erro('versao')" placeholder="Ex.: XEi, Comfort, LTZ">
+            <div class="invalid-feedback">{{ erro('versao') }}</div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label" for="anoFab">Ano de fabricação</label>
+            <select id="anoFab" class="form-select" name="ano_fabricacao" [(ngModel)]="carro.ano_fabricacao" (ngModelChange)="aoMudarAno()" [class.is-invalid]="erro('ano_fabricacao')">
+              <option [ngValue]="null">Ano</option>
+              <option *ngFor="let ano of anos" [ngValue]="ano">{{ ano }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('ano_fabricacao') }}</div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label" for="anoMod">Ano-modelo</label>
+            <select id="anoMod" class="form-select" name="ano_modelo" [(ngModel)]="carro.ano_modelo" [class.is-invalid]="erro('ano_modelo')">
+              <option [ngValue]="null">Ano</option>
+              <option *ngFor="let ano of anosDoModelo" [ngValue]="ano">{{ ano }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('ano_modelo') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="categoria">Categoria</label>
+            <select id="categoria" class="form-select" name="categoria" [(ngModel)]="carro.categoria" (ngModelChange)="aoMudarCategoria()" [class.is-invalid]="erro('categoria')">
+              <option value="">Selecione</option>
+              <option *ngFor="let item of categorias" [value]="item">{{ item }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('categoria') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="combustivel">Combustível</label>
+            <select id="combustivel" class="form-select" name="combustivel" [(ngModel)]="carro.combustivel" [class.is-invalid]="erro('combustivel')">
+              <option value="">Selecione</option>
+              <option *ngFor="let item of combustiveis" [value]="item">{{ item }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('combustivel') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="transmissao">Transmissão</label>
+            <select id="transmissao" class="form-select" name="transmissao" [(ngModel)]="carro.transmissao" [class.is-invalid]="erro('transmissao')">
+              <option value="">Selecione</option>
+              <option *ngFor="let item of transmissoes" [value]="item">{{ item }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('transmissao') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="motor">Motorização</label>
+            <input id="motor" class="form-control" name="motorizacao" maxlength="40" [(ngModel)]="carro.motorizacao" [placeholder]="placeholderMotor" [class.is-invalid]="erro('motorizacao')">
+            <div class="invalid-feedback">{{ erro('motorizacao') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="cor">Cor</label>
+            <select id="cor" class="form-select" name="id_cor" [(ngModel)]="carro.id_cor" [class.is-invalid]="erro('cor')">
+              <option [ngValue]="null">Selecione a cor</option>
+              <option *ngFor="let cor of cores" [ngValue]="cor.id_cor">{{ cor.nome }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('cor') }}</div>
+            <p class="form-text mb-0" *ngIf="cores.length === 0">Nenhuma cor cadastrada. <a routerLink="/cadastros/cores">Cadastrar cor</a></p>
+          </div>
+          <div class="col-md-2 mb-3">
+            <label class="form-label" for="portas">Portas</label>
+            <input id="portas" type="number" min="2" max="6" class="form-control" name="portas" [(ngModel)]="carro.portas" [class.is-invalid]="erro('portas')">
+            <div class="invalid-feedback">{{ erro('portas') }}</div>
+          </div>
+          <div class="col-md-2 mb-3">
+            <label class="form-label" for="passageiros">Passageiros</label>
+            <input id="passageiros" type="number" min="1" [max]="tetoPassageiros" class="form-control" name="passageiros" [(ngModel)]="carro.passageiros" [class.is-invalid]="erro('passageiros')">
+            <div class="invalid-feedback">{{ erro('passageiros') }}</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <hr class="mt-4">
+      <section class="card p-4 mb-3">
+        <h3 class="h5 fw-bold">Documentos e comercial</h3>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="placa">Placa</label>
+            <input id="placa" class="form-control text-uppercase" name="placa" maxlength="7" [value]="carro.placa" (input)="aoDigitarPlaca($event)" placeholder="ABC1D23" [class.is-invalid]="erro('placa')">
+            <div class="form-text">7 caracteres, sem hífen: ABC1234 ou ABC1D23. {{ carro.placa.length }}/7</div>
+            <div class="invalid-feedback">{{ erro('placa') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="chassi">Chassi</label>
+            <input id="chassi" class="form-control text-uppercase" name="chassi" maxlength="30" [value]="carro.chassi" (input)="aoDigitarChassi($event)" [class.is-invalid]="erro('chassi')">
+            <div class="form-text">De 5 a 30 letras ou números. {{ carro.chassi.length }}/30</div>
+            <div class="invalid-feedback">{{ erro('chassi') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="km">Quilometragem (km)</label>
+            <input id="km" inputmode="numeric" class="form-control" name="quilometragem" [value]="kmTexto" (input)="aoDigitarKm($event)" placeholder="0" [class.is-invalid]="erro('quilometragem')">
+            <div class="form-text">De 0 a 2.000.000. O ponto de milhar entra sozinho.</div>
+            <div class="invalid-feedback">{{ erro('quilometragem') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="valor">Valor (R$)</label>
+            <input id="valor" inputmode="decimal" class="form-control" name="valor" [value]="valorTexto" (input)="aoDigitarValor($event)" (blur)="aoSairValor($event)" placeholder="0,00" [class.is-invalid]="erro('valor')">
+            <div class="form-text">Ex.: 1000 vira 1.000 e, ao sair do campo, 1.000,00.</div>
+            <div class="invalid-feedback">{{ erro('valor') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="situacao">Situação de venda</label>
+            <select id="situacao" class="form-select" name="situacao" [(ngModel)]="carro.situacao" [class.is-invalid]="erro('situacao')">
+              <option value="D">Disponível</option>
+              <option value="R">Reservado</option>
+              <option value="V">Vendido</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('situacao') }}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="conservacao">Conservação</label>
+            <select id="conservacao" class="form-select" name="conservacao" [(ngModel)]="carro.conservacao" (ngModelChange)="atualizarSugestao(!classificacaoManual)" [class.is-invalid]="erro('conservacao')">
+              <option value="">Selecione</option>
+              <option *ngFor="let item of conservacoes" [value]="item">{{ rotulosConservacao[item] }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('conservacao') }}</div>
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label" for="condicao">Classificação</label>
+            <select id="condicao" class="form-select" name="condicao" [ngModel]="carro.condicao" (ngModelChange)="escolherCondicao($event)" [class.is-invalid]="erro('condicao')">
+              <option value="">Selecione</option>
+              <option *ngFor="let item of condicoes" [value]="item">{{ rotulosCondicao[item] }}</option>
+            </select>
+            <div class="invalid-feedback">{{ erro('condicao') }}</div>
+            <p class="form-text mb-0" *ngIf="sugestao">Sugestão: {{ rotulosCondicao[sugestao] }}. {{ motivo }}</p>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="historico">Histórico e observações</label>
+            <textarea id="historico" class="form-control" name="historico" rows="3" maxlength="500" [(ngModel)]="carro.historico" placeholder="Revisões, sinistros ou procedência. Este texto não altera a classificação sozinho." [class.is-invalid]="erro('historico')"></textarea>
+            <div class="invalid-feedback">{{ erro('historico') }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card p-4 mb-3">
+        <h3 class="h5 fw-bold">Acessórios</h3>
+        <p class="text-muted" *ngIf="acessorios.length === 0">Nenhum acessório cadastrado. <a routerLink="/cadastros/acessorios">Cadastrar acessório</a></p>
+        <div class="row">
+          <div class="col-md-4 mb-2" *ngFor="let acessorio of acessorios">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" [id]="'ac-' + acessorio.id_acessorio" [checked]="carro.acessorios.includes(acessorio.id_acessorio)" (change)="toggleAcessorio(acessorio.id_acessorio)">
+              <label class="form-check-label" [for]="'ac-' + acessorio.id_acessorio">{{ acessorio.nome }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="text-danger small mt-2" *ngIf="erro('acessorios')">{{ erro('acessorios') }}</div>
+      </section>
+
       <div class="d-flex justify-content-end gap-2">
-        <button class="btn btn-light" (click)="cancelar()">Cancelar</button>
-        <button class="btn btn-primary" (click)="salvar()">Salvar Veículo</button>
+        <button type="button" class="btn btn-light" (click)="cancelar()" [disabled]="salvando">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="salvando || !regras">
+          {{ salvando ? 'Salvando...' : 'Salvar veículo' }}
+        </button>
       </div>
-    </div>
+    </form>
   </div>
 </div>

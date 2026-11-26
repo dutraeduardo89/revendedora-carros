@@ -1,24 +1,55 @@
-<div class="row justify-content-center mt-5">
-  <div class="col-md-6">
-    <div class="card p-4">
-      <h3 class="fw-bold mb-4 text-center">Configurações</h3>
-      <p class="text-muted text-center mb-4">Gerencie sua credencial de acesso.</p>
-      
-      <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
-
-      <div class="mb-3">
-        <label class="form-label fw-medium">Senha Atual</label>
-        <input type="password" class="form-control" [(ngModel)]="senhaAtual">
-      </div>
-      <div class="mb-3">
-        <label class="form-label fw-medium">Nova Senha</label>
-        <input type="password" class="form-control" [(ngModel)]="novaSenha">
-      </div>
-      <div class="mb-4">
-        <label class="form-label fw-medium">Confirmar Nova Senha</label>
-        <input type="password" class="form-control" [(ngModel)]="confirmarSenha">
-      </div>
-      <button class="btn btn-primary w-100" (click)="salvarSenha()">Atualizar Senha</button>
+<div class="row g-4 justify-content-center">
+  <div class="col-lg-5">
+    <div class="card p-4 h-100">
+      <h2 class="h4 fw-bold">Senha</h2>
+      <p class="text-muted">Depois de alterar a senha, entre novamente. A sessão atual é encerrada.</p>
+      <div *ngIf="msgSenha" class="alert {{ tipoSenha }}" role="alert">{{ msgSenha }}</div>
+      <form (ngSubmit)="salvarSenha()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="senhaAtual">Senha atual</label>
+          <input id="senhaAtual" type="password" class="form-control" name="senhaAtual" [(ngModel)]="senhaAtual" autocomplete="current-password" [class.is-invalid]="errosSenha['senha_atual']">
+          <div class="invalid-feedback">{{ errosSenha['senha_atual'] }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="novaSenha">Nova senha</label>
+          <input id="novaSenha" type="password" class="form-control" name="novaSenha" [(ngModel)]="novaSenha" autocomplete="new-password" [class.is-invalid]="errosSenha['nova_senha']">
+          <div class="invalid-feedback">{{ errosSenha['nova_senha'] }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="confirmarSenha">Confirmar nova senha</label>
+          <input id="confirmarSenha" type="password" class="form-control" name="confirmarSenha" [(ngModel)]="confirmarSenha" autocomplete="new-password" [class.is-invalid]="errosSenha['confirmar']">
+          <div class="invalid-feedback">{{ errosSenha['confirmar'] }}</div>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="salvandoSenha">{{ salvandoSenha ? 'Salvando...' : 'Atualizar senha' }}</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-4 h-100">
+      <h2 class="h4 fw-bold">Classificação comercial</h2>
+      <p class="text-muted">Estas faixas valem só para a sua conta. Veículos já salvos não são reclassificados.</p>
+      <div *ngIf="carregando" class="py-4 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div></div>
+      <div *ngIf="msgRegras" class="alert {{ tipoRegras }}" role="alert">{{ msgRegras }}</div>
+      <form *ngIf="!carregando" (ngSubmit)="salvarRegras()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="novoKm">Novo até (km)</label>
+          <input id="novoKm" type="number" min="0" class="form-control" name="novoKm" [(ngModel)]="regras.novo_km_max" [class.is-invalid]="errosRegras['novo_km_max']">
+          <div class="form-text">0 significa zero-quilômetro.</div>
+          <div class="invalid-feedback">{{ errosRegras['novo_km_max'] }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="semiKm">Seminovo até (km)</label>
+          <input id="semiKm" type="number" min="0" class="form-control" name="semiKm" [(ngModel)]="regras.seminovo_km_max" [class.is-invalid]="errosRegras['seminovo_km_max']">
+          <div class="invalid-feedback">{{ errosRegras['seminovo_km_max'] }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="idadeVelho">Idade mínima para velho (anos)</label>
+          <input id="idadeVelho" type="number" min="1" max="60" class="form-control" name="idadeVelho" [(ngModel)]="regras.velho_idade_min" [class.is-invalid]="errosRegras['velho_idade_min']">
+          <div class="form-text">Velho também exige conservação regular ou ruim. Idade sozinha não classifica o veículo.</div>
+          <div class="invalid-feedback">{{ errosRegras['velho_idade_min'] }}</div>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="salvandoRegras">{{ salvandoRegras ? 'Salvando...' : 'Salvar regras' }}</button>
+      </form>
     </div>
   </div>
 </div>

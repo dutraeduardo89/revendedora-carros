@@ -1,84 +1,217 @@
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
   <div>
-    <h2 class="fw-bold mb-1">Inventário de Veículos</h2>
-    <p class="text-muted mb-0">Gerencie os carros da sua revendedora.</p>
+    <h2 class="fw-bold mb-1">Inventário</h2>
+    <p class="text-muted mb-0">{{ carros.length }} veículo(s) na sua conta.</p>
   </div>
-  <div class="d-flex gap-2">
-    <input type="text" class="form-control" placeholder="Filtrar por Placa, ID, Marca..." [(ngModel)]="filtroTexto" (input)="filtrar()">
-    <a class="btn btn-primary text-nowrap" routerLink="/cadastrar">+ Novo Veículo</a>
-  </div>
+  <a class="btn btn-primary" routerLink="/cadastrar">Novo veículo</a>
 </div>
 
-<div *ngIf="msg" class="alert alert-success py-2">{{ msg }}</div>
+<div class="row g-3 mb-4" *ngIf="!loading && !erro">
+  <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Total</div><div class="fs-4 fw-bold">{{ stats.total }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Disponíveis</div><div class="fs-4 fw-bold text-success">{{ stats.disponiveis }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Reservados</div><div class="fs-4 fw-bold" style="color:#a16207">{{ stats.reservados }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Vendidos</div><div class="fs-4 fw-bold text-danger">{{ stats.vendidos }}</div></div></div>
+</div>
+
+<div *ngIf="msg" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
+<div *ngIf="erro" class="alert alert-danger" role="alert">
+  {{ erro }}
+  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button>
+</div>
+<div *ngIf="!erro && stats.por_condicao.indefinida > 0" class="alert alert-warning" role="status">
+  Há veículos salvos antes da classificação completa. Abra a edição de cada um para informar ano-modelo, conservação e condição.
+</div>
 
 <div *ngIf="loading" class="text-center my-5 py-5">
-  <div class="spinner-border text-primary"></div>
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div>
 </div>
 
-<div class="card" *ngIf="!loading">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
+<div class="card p-3 mb-3 filtros-card" *ngIf="!loading && !erro">
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <label class="form-label" for="busca">Busca</label>
+      <input id="busca" class="form-control" placeholder="Placa, chassi, marca, modelo ou cor" [(ngModel)]="filtro.texto" (ngModelChange)="aplicarFiltros()">
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+      <label class="form-label" for="fSituacao">Situação</label>
+      <select id="fSituacao" class="form-select" [(ngModel)]="filtro.situacao" (ngModelChange)="aplicarFiltros()">
+        <option value="">Nenhum</option>
+        <option value="D">Disponível</option>
+        <option value="R">Reservado</option>
+        <option value="V">Vendido</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+      <label class="form-label" for="fCondicao">Classificação</label>
+      <select id="fCondicao" class="form-select" [(ngModel)]="filtro.condicao" (ngModelChange)="aplicarFiltros()">
+        <option value="">Nenhum</option>
+        <option value="novo">Novo</option>
+        <option value="seminovo">Seminovo</option>
+        <option value="usado">Usado</option>
+        <option value="velho">Velho</option>
+        <option value="indefinida">A classificar</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+      <label class="form-label" for="fMarca">Marca</label>
+      <select id="fMarca" class="form-select" [(ngModel)]="filtro.id_marca" (ngModelChange)="aplicarFiltros()">
+        <option value="">Nenhum</option>
+        <option *ngFor="let marca of marcas" [ngValue]="marca.id_marca">{{ marca.nome }}</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+      <label class="form-label" for="fCor">Cor</label>
+      <select id="fCor" class="form-select" [(ngModel)]="filtro.cor" (ngModelChange)="aplicarFiltros()">
+        <option value="">Nenhum</option>
+        <option *ngFor="let cor of cores" [value]="cor">{{ cor }}</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" for="kmMin">Km mínimo</label>
+      <input id="kmMin" inputmode="numeric" class="form-control" [ngModel]="filtro.kmMin" (input)="formatarKmFiltro('kmMin', $event)">
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" for="kmMax">Km máximo</label>
+      <input id="kmMax" inputmode="numeric" class="form-control" [ngModel]="filtro.kmMax" (input)="formatarKmFiltro('kmMax', $event)">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label" for="anoMin">Ano de</label>
+      <input id="anoMin" type="number" class="form-control" [(ngModel)]="filtro.anoMin" (ngModelChange)="aplicarFiltros()">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label" for="anoMax">Ano até</label>
+      <input id="anoMax" type="number" class="form-control" [(ngModel)]="filtro.anoMax" (ngModelChange)="aplicarFiltros()">
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label" for="ordem">Ordenar</label>
+      <select id="ordem" class="form-select" [(ngModel)]="ordenacao" (ngModelChange)="aplicarFiltros()">
+        <option value="id-desc">ID decrescente</option>
+        <option value="id-asc">ID crescente</option>
+        <option value="placa-asc">Placa crescente</option>
+        <option value="placa-desc">Placa decrescente</option>
+        <option value="ano-desc">Ano decrescente</option>
+        <option value="ano-asc">Ano crescente</option>
+        <option value="km-asc">Km crescente</option>
+        <option value="km-desc">Km decrescente</option>
+        <option value="valor-desc">Valor decrescente</option>
+        <option value="valor-asc">Valor crescente</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2 d-flex align-items-end">
+      <button type="button" class="btn btn-light w-100" (click)="limparFiltros()">Limpar</button>
+    </div>
+  </div>
+</div>
+
+<div class="card inventario-tabela" *ngIf="!loading && !erro">
+  <div class="table-responsive" *ngIf="carrosFiltrados.length; else vazio">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
         <tr>
-          <th>ID</th><th>Veículo</th><th>Modelo / Marca</th><th>Ano</th><th>Valor</th><th>Status</th><th class="text-end">Ações</th>
+          <th>Placa</th>
+          <th>Veículo</th>
+          <th>Ano</th>
+          <th>Km</th>
+          <th>Valor</th>
+          <th>Situação</th>
+          <th class="text-end">Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let carro of carrosFiltrados">
-          <td class="text-muted">#{{ carro.id_carro }}</td>
-          <td>
-            <div class="fw-bold text-dark">{{ carro.placa }}</div>
-            <small class="text-muted">{{ carro.cor }}</small>
+        <tr *ngFor="let carro of carrosFiltrados; trackBy: trackCarro">
+          <td class="text-nowrap">
+            <span class="fw-bold" [ngClass]="classePlaca(carro.situacao)">{{ carro.placa }}</span>
           </td>
           <td>
-            <div class="fw-medium">{{ carro.modelo }}</div>
-            <small class="text-muted">{{ carro.marca }}</small>
+            <div class="fw-semibold text-nowrap">{{ carro.modelo }}</div>
+            <div class="small text-muted text-nowrap">{{ carro.marca }} · {{ carro.cor }}</div>
           </td>
-          <td>{{ carro.ano }}</td>
-          <td>{{ carro.valor | currency:'BRL' }}</td>
+          <td class="text-nowrap">{{ carro.ano }}/{{ carro.ano_modelo }}</td>
+          <td class="text-nowrap">{{ carro.quilometragem | number:'1.0-0' }}</td>
+          <td class="text-nowrap">{{ carro.valor | currency:'BRL' }}</td>
           <td>
-            <span class="badge rounded-pill" [ngClass]="carro.situacao === 'D' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
-              {{ carro.situacao === 'D' ? 'Disponível' : 'Vendido' }}
-            </span>
+            <label class="visually-hidden" [attr.for]="'sit' + carro.id_carro">Situação de {{ carro.placa }}</label>
+            <select class="form-select form-select-sm situacao-select" [id]="'sit' + carro.id_carro" [ngModel]="carro.situacao" (ngModelChange)="alterarSituacao(carro, $event)" [disabled]="alterando === carro.id_carro">
+              <option value="D">Disponível</option>
+              <option value="R">Reservado</option>
+              <option value="V">Vendido</option>
+            </select>
           </td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-link text-primary p-0 me-3 text-decoration-none" (click)="verDetalhes(carro)" title="Ver Detalhes"><i class="bi bi-eye-fill fs-5"></i></button>
-            <button class="btn btn-sm btn-link text-warning p-0 me-3 text-decoration-none" (click)="editar(carro)" title="Editar"><i class="bi bi-pencil-square fs-5"></i></button>
-            <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir(carro.id_carro)" title="Excluir"><i class="bi bi-trash fs-5"></i></button>
+          <td class="text-end text-nowrap">
+            <button type="button" class="btn btn-sm btn-link" (click)="verDetalhes(carro)">Detalhes</button>
+            <button type="button" class="btn btn-sm btn-link" (click)="editar(carro)">Editar</button>
+            <button type="button" class="btn btn-sm btn-link text-danger" (click)="pedirExclusao(carro)">Excluir</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+  <ng-template #vazio>
+    <div class="p-5 text-center">
+      <h3 class="h5">Nenhum veículo encontrado</h3>
+      <p class="text-muted" *ngIf="carros.length === 0">Cadastre o primeiro veículo da sua revendedora.</p>
+      <p class="text-muted" *ngIf="carros.length > 0">Nenhum veículo corresponde aos filtros.</p>
+      <a *ngIf="carros.length === 0" class="btn btn-primary" routerLink="/cadastrar">Novo veículo</a>
+      <button *ngIf="carros.length > 0" type="button" class="btn btn-light" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  </ng-template>
 </div>
 
-<!-- MODAL OLHO MÁGICO -->
-<div class="modal fade show d-block" *ngIf="carroSelecionado" style="background: rgba(0,0,0,0.5);">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content shadow-lg border-0">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Detalhes do Veículo: {{ carroSelecionado.placa }}</h5>
-        <button type="button" class="btn-close btn-close-white" (click)="carroSelecionado = null"></button>
+<div class="modal fade show d-block" *ngIf="carroSelecionado" role="dialog" aria-modal="true" aria-labelledby="tituloDetalhe">
+  <div class="modal-backdrop-local" (click)="carroSelecionado = null"></div>
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title h5" id="tituloDetalhe"><span [ngClass]="classePlaca(carroSelecionado.situacao)">{{ carroSelecionado.placa }}</span></h3>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="carroSelecionado = null"></button>
       </div>
-      <div class="modal-body p-4">
-        <div class="row mb-3">
-          <div class="col-md-6"><strong>ID:</strong> #{{ carroSelecionado.id_carro }}</div>
-          <div class="col-md-6"><strong>Chassi:</strong> {{ carroSelecionado.chassi }}</div>
-          <div class="col-md-6"><strong>Modelo:</strong> {{ carroSelecionado.modelo }}</div>
-          <div class="col-md-6"><strong>Marca:</strong> {{ carroSelecionado.marca }}</div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-6"><strong>Marca / modelo:</strong> {{ carroSelecionado.marca }} {{ carroSelecionado.modelo }}</div>
+          <div class="col-md-6"><strong>Versão:</strong> {{ carroSelecionado.versao || '—' }}</div>
+          <div class="col-md-6"><strong>Fabricação / modelo:</strong> {{ carroSelecionado.ano }}/{{ carroSelecionado.ano_modelo }}</div>
+          <div class="col-md-6"><strong>Categoria:</strong> {{ carroSelecionado.categoria || '—' }}</div>
+          <div class="col-md-6"><strong>Combustível:</strong> {{ carroSelecionado.combustivel || '—' }}</div>
+          <div class="col-md-6"><strong>Transmissão:</strong> {{ carroSelecionado.transmissao || '—' }}</div>
+          <div class="col-md-6"><strong>Motorização:</strong> {{ carroSelecionado.motorizacao || '—' }}</div>
           <div class="col-md-6"><strong>Cor:</strong> {{ carroSelecionado.cor }}</div>
-          <div class="col-md-6"><strong>Ano:</strong> {{ carroSelecionado.ano }}</div>
+          <div class="col-md-6"><strong>Portas / passageiros:</strong> {{ carroSelecionado.portas || '—' }} / {{ carroSelecionado.passageiros || '—' }}</div>
+          <div class="col-md-6"><strong>Quilometragem:</strong> {{ carroSelecionado.quilometragem | number:'1.0-0' }} km</div>
+          <div class="col-md-6"><strong>Classificação:</strong> {{ rotuloCondicao(carroSelecionado.condicao) }}</div>
+          <div class="col-md-6"><strong>Conservação:</strong> {{ rotulosConservacao[carroSelecionado.conservacao] || '—' }}</div>
           <div class="col-md-6"><strong>Valor:</strong> {{ carroSelecionado.valor | currency:'BRL' }}</div>
-          <div class="col-md-6"><strong>KM:</strong> {{ carroSelecionado.quilometragem }}</div>
+          <div class="col-md-6"><strong>Situação:</strong> {{ rotuloSituacao(carroSelecionado.situacao) }}</div>
+          <div class="col-md-6"><strong>Chassi:</strong> {{ carroSelecionado.chassi }}</div>
           <div class="col-md-6"><strong>Criado em:</strong> {{ carroSelecionado.criado_em }}</div>
-          <div class="col-md-6"><strong>Editado em:</strong> {{ carroSelecionado.editado_em }}</div>
+          <div class="col-md-6"><strong>Atualizado em:</strong> {{ carroSelecionado.editado_em }}</div>
+          <div class="col-12" *ngIf="carroSelecionado.historico"><strong>Histórico:</strong> {{ carroSelecionado.historico }}</div>
         </div>
-        <hr>
-        <h6 class="fw-bold">Acessórios Vinculados:</h6>
-        <ul>
-          <li *ngFor="let ac of carroSelecionado.acessorios">{{ ac }}</li>
-          <li *ngIf="carroSelecionado.acessorios.length === 0" class="text-muted">Nenhum acessório cadastrado.</li>
+        <h4 class="h6 mt-3">Acessórios</h4>
+        <p class="mb-0" *ngIf="!carroSelecionado.acessorios.length">Nenhum acessório vinculado.</p>
+        <ul class="mb-0" *ngIf="carroSelecionado.acessorios.length">
+          <li *ngFor="let acessorio of carroSelecionado.acessorios">{{ acessorio }}</li>
         </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="carroSelecionado = null">Fechar</button>
+        <button type="button" class="btn btn-primary" (click)="editar(carroSelecionado)">Editar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade show d-block" *ngIf="confirmacao" role="dialog" aria-modal="true" aria-labelledby="tituloExcluir">
+  <div class="modal-backdrop-local" (click)="confirmacao = null"></div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title h5" id="tituloExcluir">Excluir veículo</h3>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="confirmacao = null"></button>
+      </div>
+      <div class="modal-body">O veículo {{ confirmacao.placa }} será removido do inventário, junto com os acessórios vinculados a ele.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="confirmacao = null" [disabled]="excluindo">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarExclusao()" [disabled]="excluindo">{{ excluindo ? 'Excluindo...' : 'Excluir' }}</button>
       </div>
     </div>
   </div>

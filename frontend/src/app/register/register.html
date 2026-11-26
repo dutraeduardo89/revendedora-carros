@@ -1,25 +1,29 @@
-<div class="row justify-content-center mt-5">
-  <div class="col-md-4">
-    <div class="card shadow">
+<div class="row justify-content-center mt-4 mt-md-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card border-0">
       <div class="card-body p-4">
-        <h3 class="card-title text-center mb-4 fw-bold">Criar Nova Conta</h3>
-        
-        <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
-
-        <div class="mb-3">
-          <label class="form-label fw-medium">Nome de Usuário</label>
-          <input type="text" class="form-control" [(ngModel)]="dados.login" placeholder="Ex: joao123">
-        </div>
-        <div class="mb-4">
-          <label class="form-label fw-medium">Senha</label>
-          <input type="password" class="form-control" [(ngModel)]="dados.senha" placeholder="Sua senha secreta">
-        </div>
-        
-        <button class="btn btn-success w-100 mb-3" (click)="registrar()">Cadastrar</button>
-        
-        <div class="text-center">
-          <a routerLink="/" class="text-decoration-none">Já tenho conta. Fazer Login</a>
-        </div>
+        <h1 class="h3 text-center mb-2 fw-bold">Criar conta</h1>
+        <p class="text-center text-muted mb-4">Cada conta administra o próprio estoque.</p>
+        <div *ngIf="msg" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
+        <form (ngSubmit)="registrar()" novalidate>
+          <div class="mb-3">
+            <label class="form-label" for="usuario">Usuário</label>
+            <input id="usuario" class="form-control" name="login" [(ngModel)]="dados.login" autocomplete="username" [class.is-invalid]="erros['login']">
+            <div class="invalid-feedback">{{ erros['login'] }}</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="senha">Senha</label>
+            <input id="senha" type="password" class="form-control" name="senha" [(ngModel)]="dados.senha" autocomplete="new-password" [class.is-invalid]="erros['senha']">
+            <div class="invalid-feedback">{{ erros['senha'] }}</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="confirmar">Confirmar senha</label>
+            <input id="confirmar" type="password" class="form-control" name="confirmar" [(ngModel)]="dados.confirmar" autocomplete="new-password" [class.is-invalid]="erros['confirmar']">
+            <div class="invalid-feedback">{{ erros['confirmar'] }}</div>
+          </div>
+          <button class="btn btn-primary w-100 mb-3" type="submit" [disabled]="enviando">{{ enviando ? 'Cadastrando...' : 'Cadastrar' }}</button>
+        </form>
+        <div class="text-center"><a routerLink="/">Já tenho conta</a></div>
       </div>
     </div>
   </div>

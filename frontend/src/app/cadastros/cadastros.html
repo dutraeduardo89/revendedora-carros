@@ -1,86 +1,106 @@
-<div class="row">
-  <div class="col-12 mb-3">
-    <h2 class="fw-bold">Gerenciar Cadastros</h2>
-    <div *ngIf="msg" class="alert {{ tipoMsg }} py-2">{{ msg }}</div>
-  </div>
+<div class="mb-3">
+  <h2 class="fw-bold mb-1">{{ atual.titulo }}</h2>
+  <p class="text-muted mb-0">{{ atual.texto }}</p>
+</div>
 
-  <!-- MARCAS -->
-  <div class="col-md-4 mb-4">
-    <div class="card p-3">
-      <h5 class="fw-bold text-primary">Marcas</h5>
-      <div class="input-group mb-2">
-        <input type="text" class="form-control form-control-sm" placeholder="Nome da marca" [(ngModel)]="novaMarca.nome">
-        <button class="btn btn-primary btn-sm" (click)="salvar('marca', novaMarca)">Add</button>
-      </div>
-      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroMarca">
-      <div class="table-responsive" style="max-height: 300px;">
-        <table class="table table-sm table-hover align-middle">
-          <thead><tr><th>ID</th><th>Nome</th><th class="text-end">Ações</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let m of filtrarM(marcas, filtroMarca, ['id_marca', 'nome'])">
-              <td>#{{ m.id_marca }}</td>
-              <td>{{ m.nome }}</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('marca', m.id_marca)"><i class="bi bi-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+<nav class="catalogo-nav" aria-label="Cadastros">
+  <a *ngFor="let item of secoes" [routerLink]="['/cadastros', item.id]" routerLinkActive="active">{{ item.titulo }}</a>
+</nav>
+
+<div *ngIf="msg" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
+<div *ngIf="erro" class="alert alert-danger" role="alert">
+  {{ erro }}
+  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregarTudo()">Tentar novamente</button>
+</div>
+<div *ngIf="carregando" class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div></div>
+
+<section class="card p-4" *ngIf="!carregando && !erro">
+  <div class="row g-3 align-items-end mb-3">
+    <div class="col-md-5" *ngIf="secao === 'marcas'">
+      <label class="form-label" for="novaMarca">{{ edicao?.tipo === 'marca' ? 'Editar marca' : 'Nova marca' }}</label>
+      <input id="novaMarca" class="form-control" maxlength="50" [(ngModel)]="novaMarca" placeholder="Nome da marca">
     </div>
-  </div>
-
-  <!-- MODELOS -->
-  <div class="col-md-4 mb-4">
-    <div class="card p-3">
-      <h5 class="fw-bold text-primary">Modelos</h5>
-      <input type="text" class="form-control form-control-sm mb-2" placeholder="Nome do modelo" [(ngModel)]="novoModelo.nome">
-      <select class="form-select form-select-sm mb-2" [(ngModel)]="novoModelo.id_marca">
-        <option [ngValue]="null">Selecione a Marca</option>
-        <option *ngFor="let m of marcas" [ngValue]="m.id_marca">{{ m.nome }}</option>
+    <div class="col-md-4" *ngIf="secao === 'modelos'">
+      <label class="form-label" for="novoModelo">{{ edicao?.tipo === 'modelo' ? 'Editar modelo' : 'Novo modelo' }}</label>
+      <input id="novoModelo" class="form-control" maxlength="50" [(ngModel)]="novoModelo.nome" placeholder="Nome do modelo">
+    </div>
+    <div class="col-md-3" *ngIf="secao === 'modelos'">
+      <label class="form-label" for="marcaModelo">Marca</label>
+      <select id="marcaModelo" class="form-select" [(ngModel)]="novoModelo.id_marca">
+        <option [ngValue]="null">Selecione a marca</option>
+        <option *ngFor="let marca of marcas" [ngValue]="marca.id_marca">{{ marca.nome }}</option>
       </select>
-      <button class="btn btn-primary btn-sm mb-2" (click)="salvar('modelo', novoModelo)">Adicionar Modelo</button>
-      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroModelo">
-      <div class="table-responsive" style="max-height: 300px;">
-        <table class="table table-sm table-hover align-middle">
-          <thead><tr><th>ID</th><th>Nome</th><th>Marca</th><th class="text-end">Ações</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let m of filtrarM(modelos, filtroModelo, ['id_modelo', 'nome'])">
-              <td>#{{ m.id_modelo }}</td>
-              <td>{{ m.nome }}</td>
-              <td><small>{{ m.marca_nome }}</small></td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('modelo', m.id_modelo)"><i class="bi bi-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    </div>
+    <div class="col-md-5" *ngIf="secao === 'acessorios'">
+      <label class="form-label" for="novoAcessorio">{{ edicao?.tipo === 'acessorio' ? 'Editar acessório' : 'Novo acessório' }}</label>
+      <input id="novoAcessorio" class="form-control" maxlength="50" [(ngModel)]="novoAcessorio" placeholder="Nome do acessório">
+    </div>
+    <div class="col-md-5" *ngIf="secao === 'cores'">
+      <label class="form-label" for="novaCor">{{ edicao?.tipo === 'cor' ? 'Editar cor' : 'Nova cor' }}</label>
+      <input id="novaCor" class="form-control" maxlength="40" [(ngModel)]="novaCor" placeholder="Ex.: Branco, Verde lima">
+    </div>
+    <div class="col-md-auto d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="salvar(atual.tipo)" [disabled]="salvando === atual.tipo">{{ salvando === atual.tipo ? 'Salvando...' : (edicao?.tipo === atual.tipo ? 'Salvar' : 'Adicionar') }}</button>
+      <button type="button" class="btn btn-light" *ngIf="edicao?.tipo === atual.tipo" (click)="cancelarEdicao(atual.tipo)">Cancelar</button>
     </div>
   </div>
 
-  <!-- ACESSÓRIOS -->
-  <div class="col-md-4 mb-4">
-    <div class="card p-3">
-      <h5 class="fw-bold text-primary">Acessórios</h5>
-      <div class="input-group mb-2">
-        <input type="text" class="form-control form-control-sm" placeholder="Nome do acessório" [(ngModel)]="novoAcessorio.nome">
-        <button class="btn btn-primary btn-sm" (click)="salvar('acessorio', novoAcessorio)">Add</button>
+  <div class="row g-2 mb-3">
+    <div class="col-md-6">
+      <label class="form-label" for="filtroSecao">Filtrar</label>
+      <input id="filtroSecao" class="form-control" [(ngModel)]="filtro" placeholder="Buscar pelo nome">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="ordemSecao">Ordenar</label>
+      <select id="ordemSecao" class="form-select" [(ngModel)]="ordem">
+        <option value="nome-asc">Nome crescente</option>
+        <option value="nome-desc">Nome decrescente</option>
+        <option value="id-asc">ID crescente</option>
+        <option value="id-desc">ID decrescente</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-responsive" *ngIf="listaAtual.length; else vazio">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th *ngIf="secao === 'modelos'">Marca</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of listaAtual">
+          <td>{{ idItem(item) }}</td>
+          <td>{{ item.nome }}</td>
+          <td *ngIf="secao === 'modelos'">{{ item.marca_nome }}</td>
+          <td class="text-end text-nowrap">
+            <button type="button" class="btn btn-sm btn-link" (click)="editar(atual.tipo, item)">Editar</button>
+            <button type="button" class="btn btn-sm btn-link text-danger" (click)="pedirExclusao(atual.tipo, item)">Excluir</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #vazio>
+    <p class="text-muted mb-0">Nenhum registro nesta seção.</p>
+  </ng-template>
+</section>
+
+<div class="modal fade show d-block" *ngIf="confirmacao" role="dialog" aria-modal="true" aria-labelledby="tituloExcluirCatalogo">
+  <div class="modal-backdrop-local" (click)="confirmacao = null"></div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title h5" id="tituloExcluirCatalogo">Excluir {{ confirmacao.nome }}</h3>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="confirmacao = null"></button>
       </div>
-      <input type="text" class="form-control form-control-sm mb-2" placeholder="Filtrar por ID ou Nome..." [(ngModel)]="filtroAcessorio">
-      <div class="table-responsive" style="max-height: 300px;">
-        <table class="table table-sm table-hover align-middle">
-          <thead><tr><th>ID</th><th>Nome</th><th class="text-end">Ações</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let a of filtrarM(acessorios, filtroAcessorio, ['id_acessorio', 'nome'])">
-              <td>#{{ a.id_acessorio }}</td>
-              <td>{{ a.nome }}</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir('acessorio', a.id_acessorio)"><i class="bi bi-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="modal-body">{{ confirmacao.aviso }}</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="confirmacao = null" [disabled]="excluindo">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarExclusao()" [disabled]="excluindo">{{ excluindo ? 'Excluindo...' : 'Excluir' }}</button>
       </div>
     </div>
   </div>

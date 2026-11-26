@@ -1,21 +1,36 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CarForm } from './car-form';
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { CarFormComponent } from './car-form';
+import { ApiService } from '../services/api';
+import { REGRAS_PADRAO } from '../domain/vehicle-rules';
 
-describe('CarForm', () => {
-  let component: CarForm;
-  let fixture: ComponentFixture<CarForm>;
-
+describe('CarFormComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CarForm],
+      imports: [CarFormComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
+        {
+          provide: ApiService,
+          useValue: {
+            getAuxiliares: () => of([]),
+            getRegras: () => of(REGRAS_PADRAO),
+          },
+        },
+      ],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(CarForm);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('não envia o formulário vazio', () => {
+    const fixture = TestBed.createComponent(CarFormComponent);
+    const componente = fixture.componentInstance;
+    componente.regras = REGRAS_PADRAO;
+    componente.salvar();
+    expect(componente.erros['placa']).toBeTruthy();
+    expect(componente.erros['ano_fabricacao']).toBeTruthy();
+    expect(componente.erros['quilometragem']).toBeTruthy();
+    expect(componente.salvando).toBe(false);
   });
 });

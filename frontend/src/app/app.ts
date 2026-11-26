@@ -1,19 +1,34 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
-import { CommonModule } from '@angular/common'; // Necessário para o *ngIf
+import { ApiService } from './services/api';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './app.html',
 })
 export class AppComponent {
-  constructor(public authService: AuthService, private router: Router) {}
+  menuAberto = false;
+
+  constructor(
+    public authService: AuthService,
+    private api: ApiService,
+    private router: Router,
+  ) {}
 
   sair() {
-    this.authService.logout(); // Limpa a sessão
-    this.router.navigate(['/']); // Vai para o Login
+    this.menuAberto = false;
+    this.api.logout().subscribe({
+      next: () => this.encerrar(),
+      error: () => this.encerrar(),
+    });
+  }
+
+  private encerrar() {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }
