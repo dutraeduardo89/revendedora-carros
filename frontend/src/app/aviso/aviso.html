@@ -1,0 +1,9 @@
+<details class="aviso" [class.aviso-perigo]="tipo === 'danger'" [class.aviso-ok]="tipo === 'success'">
+  <summary>
+    <span>{{ titulo }}</span>
+    <span class="aviso-contagem" *ngIf="contagem != null">{{ contagem }}</span>
+  </summary>
+  <div class="aviso-corpo">
+    <ng-content></ng-content>
+  </div>
+</details>

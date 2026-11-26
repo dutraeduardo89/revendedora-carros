@@ -120,7 +120,7 @@ function catalogos(): array
 
 function ano_catalogo_min(): int
 {
-    return (int) date('Y') - 40;
+    return 1950;
 }
 
 function ano_catalogo_max(): int

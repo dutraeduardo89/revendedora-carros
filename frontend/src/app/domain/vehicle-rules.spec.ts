@@ -1,4 +1,4 @@
-import { REGRAS_PADRAO, anosModelo, sugerirCondicao, validarVeiculo, veiculoVazio } from './vehicle-rules';
+import { REGRAS_PADRAO, anosDisponiveis, anosModelo, sugerirCondicao, validarVeiculo, veiculoVazio } from './vehicle-rules';
 
 const anoAtual = 2026;
 
@@ -26,6 +26,14 @@ function completo() {
 }
 
 describe('regras de veículo', () => {
+  it('aceita fabricação desde 1950', () => {
+    expect(anosDisponiveis(anoAtual)).toContain(1950);
+    const antigo = { ...completo(), ano_fabricacao: 1950, ano_modelo: 1950, quilometragem: 120000, conservacao: 'ruim', condicao: 'velho' };
+    expect(validarVeiculo(antigo, REGRAS_PADRAO, anoAtual)['ano_fabricacao']).toBeUndefined();
+    const fora = { ...completo(), ano_fabricacao: 1949, ano_modelo: 1949 };
+    expect(validarVeiculo(fora, REGRAS_PADRAO, anoAtual)['ano_fabricacao']).toBeTruthy();
+  });
+
   it('aceita 2026/2026, 2026/2027 e 2027/2027', () => {
     expect(anosModelo(2026, anoAtual)).toEqual([2026, 2027]);
     expect(anosModelo(2027, anoAtual)).toEqual([2027]);

@@ -8,7 +8,7 @@ No banco em uso, o usuário `admin` entra com a senha `1234`. A senha fica armaz
 
 ## Ano de fabricação e ano-modelo
 
-São campos independentes. O ano-modelo pode ser igual ao ano de fabricação ou o ano seguinte. O catálogo vai de 40 anos atrás até o ano calendário atual mais um.
+São campos independentes. O ano-modelo pode ser igual ao ano de fabricação ou o ano seguinte. O catálogo de fabricação começa em 1950 e vai até o ano calendário atual mais um.
 
 Um veículo cujo ano de fabricação já é o teto do catálogo só pode usar o mesmo ano como ano-modelo. Exemplo no calendário de 2026: 2027/2027 é válido e 2027/2028 não entra no catálogo. Veículos antigos já gravados fora dessa janela continuam editáveis se o ano de fabricação não for alterado.
 

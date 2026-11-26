@@ -6,11 +6,13 @@ import { ApiService } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { camposErro, mensagemErro } from '../services/erros';
 import { RegrasClassificacao } from '../domain/vehicle-rules';
+import { limitarInteiro } from '../domain/formato';
+import { AvisoComponent } from '../aviso/aviso';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AvisoComponent],
   templateUrl: './settings.html',
 })
 export class SettingsComponent implements OnInit {
@@ -27,6 +29,9 @@ export class SettingsComponent implements OnInit {
   salvandoSenha = false;
   salvandoRegras = false;
   carregando = true;
+  novoTexto = '';
+  semiTexto = '';
+  idadeTexto = '';
 
   constructor(
     private api: ApiService,
@@ -39,6 +44,9 @@ export class SettingsComponent implements OnInit {
     this.api.getRegras().subscribe({
       next: (regras) => {
         this.regras = regras;
+        this.novoTexto = String(regras.novo_km_max ?? '');
+        this.semiTexto = String(regras.seminovo_km_max ?? '');
+        this.idadeTexto = String(regras.velho_idade_min ?? '');
         this.carregando = false;
         this.cdr.detectChanges();
       },
@@ -49,6 +57,31 @@ export class SettingsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  get errosSenhaLista() {
+    return Object.values(this.errosSenha);
+  }
+
+  get errosRegrasLista() {
+    return Object.values(this.errosRegras);
+  }
+
+  aoDigitarRegra(campo: 'novo' | 'semi' | 'idade', evento: Event) {
+    const input = evento.target as HTMLInputElement;
+    const formatado = campo === 'idade' ? limitarInteiro(input.value, 1, 60) : limitarInteiro(input.value, 0, 1000000);
+    if (input.value !== formatado) input.value = formatado;
+    const numero = formatado === '' ? 0 : Number(formatado);
+    if (campo === 'novo') {
+      this.novoTexto = formatado;
+      this.regras.novo_km_max = numero;
+    } else if (campo === 'semi') {
+      this.semiTexto = formatado;
+      this.regras.seminovo_km_max = numero;
+    } else {
+      this.idadeTexto = formatado;
+      this.regras.velho_idade_min = numero;
+    }
   }
 
   salvarSenha() {

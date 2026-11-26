@@ -8,7 +8,12 @@
       <button type="button" class="btn btn-light" (click)="cancelar()">Voltar</button>
     </div>
 
-    <div *ngIf="msg" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
+    <app-aviso *ngIf="listaErros.length" titulo="Corrija os campos abaixo" tipo="danger" [contagem]="listaErros.length">
+      <ul class="mb-0">
+        <li *ngFor="let item of listaErros"><strong>{{ item.campo }}.</strong> {{ item.texto }}</li>
+      </ul>
+    </app-aviso>
+    <div *ngIf="msg && !listaErros.length" class="alert {{ tipoMsg }}" role="alert">{{ msg }}</div>
 
     <div *ngIf="carregando" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div>
@@ -45,6 +50,7 @@
               <option [ngValue]="null">Ano</option>
               <option *ngFor="let ano of anos" [ngValue]="ano">{{ ano }}</option>
             </select>
+            <div class="form-text">De 1950 até o ano seguinte ao atual.</div>
             <div class="invalid-feedback">{{ erro('ano_fabricacao') }}</div>
           </div>
           <div class="col-md-3 mb-3">
@@ -95,12 +101,14 @@
           </div>
           <div class="col-md-2 mb-3">
             <label class="form-label" for="portas">Portas</label>
-            <input id="portas" type="number" min="2" max="6" class="form-control" name="portas" [(ngModel)]="carro.portas" [class.is-invalid]="erro('portas')">
+            <input id="portas" inputmode="numeric" class="form-control" name="portas" [value]="portasTexto" (input)="aoDigitarPortas($event)" [class.is-invalid]="erro('portas')">
+            <div class="form-text">De 2 a 6.</div>
             <div class="invalid-feedback">{{ erro('portas') }}</div>
           </div>
           <div class="col-md-2 mb-3">
             <label class="form-label" for="passageiros">Passageiros</label>
-            <input id="passageiros" type="number" min="1" [max]="tetoPassageiros" class="form-control" name="passageiros" [(ngModel)]="carro.passageiros" [class.is-invalid]="erro('passageiros')">
+            <input id="passageiros" inputmode="numeric" class="form-control" name="passageiros" [value]="passageirosTexto" (input)="aoDigitarPassageiros($event)" [class.is-invalid]="erro('passageiros')">
+            <div class="form-text">De 1 a {{ tetoPassageiros }}.</div>
             <div class="invalid-feedback">{{ erro('passageiros') }}</div>
           </div>
         </div>
