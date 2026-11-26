@@ -1,3 +1,13 @@
+export function limitarInteiro(texto: string, min: number, max: number): string {
+  const digitos = (texto || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  if (!digitos) return '';
+  const n = Number(digitos);
+  if (!Number.isFinite(n) || n > max) return String(max);
+  if (n >= min) return String(n);
+  const maiorPossivel = Number(digitos.padEnd(String(max).length, '9'));
+  return maiorPossivel < min ? String(min) : digitos;
+}
+
 export function mascaraPlaca(texto: string): string {
   return (texto || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
 }

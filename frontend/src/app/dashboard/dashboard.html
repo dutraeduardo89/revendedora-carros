@@ -18,9 +18,19 @@
   {{ erro }}
   <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button>
 </div>
-<div *ngIf="!erro && stats.por_condicao.indefinida > 0" class="alert alert-warning" role="status">
-  Há veículos salvos antes da classificação completa. Abra a edição de cada um para informar ano-modelo, conservação e condição.
-</div>
+<app-aviso *ngIf="!erro && !loading && pendentes.length" titulo="Veículos sem classificação completa" [contagem]="pendentes.length">
+  <p class="mb-2">Abra o carro indicado e complete o que falta. A classificação usa quilometragem, ano de fabricação e conservação.</p>
+  <ul class="aviso-lista">
+    <li *ngFor="let carro of pendentes">
+      <div>
+        <strong>{{ carro.placa }}</strong>
+        <span class="text-muted"> {{ carro.modelo }}</span>
+        <div class="small">Falta: {{ carro.faltas }}.</div>
+      </div>
+      <a [routerLink]="['/cadastrar']" [queryParams]="{ id: carro.id_carro }">Completar</a>
+    </li>
+  </ul>
+</app-aviso>
 
 <div *ngIf="loading" class="text-center my-5 py-5">
   <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div>
@@ -76,11 +86,11 @@
     </div>
     <div class="col-6 col-md-2">
       <label class="form-label" for="anoMin">Ano de</label>
-      <input id="anoMin" type="number" class="form-control" [(ngModel)]="filtro.anoMin" (ngModelChange)="aplicarFiltros()">
+      <input id="anoMin" inputmode="numeric" class="form-control" [value]="filtro.anoMin ?? ''" (input)="formatarAnoFiltro('anoMin', $event)">
     </div>
     <div class="col-6 col-md-2">
       <label class="form-label" for="anoMax">Ano até</label>
-      <input id="anoMax" type="number" class="form-control" [(ngModel)]="filtro.anoMax" (ngModelChange)="aplicarFiltros()">
+      <input id="anoMax" inputmode="numeric" class="form-control" [value]="filtro.anoMax ?? ''" (input)="formatarAnoFiltro('anoMax', $event)">
     </div>
     <div class="col-12 col-md-4">
       <label class="form-label" for="ordem">Ordenar</label>

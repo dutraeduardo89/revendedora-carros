@@ -3,7 +3,10 @@
     <div class="card p-4 h-100">
       <h2 class="h4 fw-bold">Senha</h2>
       <p class="text-muted">Depois de alterar a senha, entre novamente. A sessão atual é encerrada.</p>
-      <div *ngIf="msgSenha" class="alert {{ tipoSenha }}" role="alert">{{ msgSenha }}</div>
+      <app-aviso *ngIf="errosSenhaLista.length" titulo="A senha não foi alterada" tipo="danger" [contagem]="errosSenhaLista.length">
+        <ul class="mb-0"><li *ngFor="let item of errosSenhaLista">{{ item }}</li></ul>
+      </app-aviso>
+      <div *ngIf="msgSenha && !errosSenhaLista.length" class="alert {{ tipoSenha }}" role="alert">{{ msgSenha }}</div>
       <form (ngSubmit)="salvarSenha()" novalidate>
         <div class="mb-3">
           <label class="form-label" for="senhaAtual">Senha atual</label>
@@ -29,22 +32,25 @@
       <h2 class="h4 fw-bold">Classificação comercial</h2>
       <p class="text-muted">Estas faixas valem só para a sua conta. Veículos já salvos não são reclassificados.</p>
       <div *ngIf="carregando" class="py-4 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div></div>
-      <div *ngIf="msgRegras" class="alert {{ tipoRegras }}" role="alert">{{ msgRegras }}</div>
+      <app-aviso *ngIf="errosRegrasLista.length" titulo="As faixas não foram salvas" tipo="danger" [contagem]="errosRegrasLista.length">
+        <ul class="mb-0"><li *ngFor="let item of errosRegrasLista">{{ item }}</li></ul>
+      </app-aviso>
+      <div *ngIf="msgRegras && !errosRegrasLista.length" class="alert {{ tipoRegras }}" role="alert">{{ msgRegras }}</div>
       <form *ngIf="!carregando" (ngSubmit)="salvarRegras()" novalidate>
         <div class="mb-3">
           <label class="form-label" for="novoKm">Novo até (km)</label>
-          <input id="novoKm" type="number" min="0" class="form-control" name="novoKm" [(ngModel)]="regras.novo_km_max" [class.is-invalid]="errosRegras['novo_km_max']">
+          <input id="novoKm" inputmode="numeric" class="form-control" name="novoKm" [value]="novoTexto" (input)="aoDigitarRegra('novo', $event)" [class.is-invalid]="errosRegras['novo_km_max']">
           <div class="form-text">0 significa zero-quilômetro.</div>
           <div class="invalid-feedback">{{ errosRegras['novo_km_max'] }}</div>
         </div>
         <div class="mb-3">
           <label class="form-label" for="semiKm">Seminovo até (km)</label>
-          <input id="semiKm" type="number" min="0" class="form-control" name="semiKm" [(ngModel)]="regras.seminovo_km_max" [class.is-invalid]="errosRegras['seminovo_km_max']">
+          <input id="semiKm" inputmode="numeric" class="form-control" name="semiKm" [value]="semiTexto" (input)="aoDigitarRegra('semi', $event)" [class.is-invalid]="errosRegras['seminovo_km_max']">
           <div class="invalid-feedback">{{ errosRegras['seminovo_km_max'] }}</div>
         </div>
         <div class="mb-3">
           <label class="form-label" for="idadeVelho">Idade mínima para velho (anos)</label>
-          <input id="idadeVelho" type="number" min="1" max="60" class="form-control" name="idadeVelho" [(ngModel)]="regras.velho_idade_min" [class.is-invalid]="errosRegras['velho_idade_min']">
+          <input id="idadeVelho" inputmode="numeric" class="form-control" name="idadeVelho" [value]="idadeTexto" (input)="aoDigitarRegra('idade', $event)" [class.is-invalid]="errosRegras['velho_idade_min']">
           <div class="form-text">Velho também exige conservação regular ou ruim. Idade sozinha não classifica o veículo.</div>
           <div class="invalid-feedback">{{ errosRegras['velho_idade_min'] }}</div>
         </div>

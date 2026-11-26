@@ -186,6 +186,96 @@ body {
     line-height: 1.2;
 }
 
+.aviso {
+    border: 1px solid #f3d19c;
+    background: #fffbeb;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.aviso-perigo {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.aviso summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    font-weight: 600;
+}
+
+.aviso summary::-webkit-details-marker {
+    display: none;
+}
+
+.aviso-contagem {
+    min-width: 1.6rem;
+    text-align: center;
+    border-radius: 999px;
+    background: #fff;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.85rem;
+}
+
+.aviso-corpo {
+    padding: 0 1rem 1rem;
+}
+
+.aviso-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.aviso-lista li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+.barra-linha {
+    display: grid;
+    grid-template-columns: minmax(7rem, 9rem) 1fr 2rem;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.65rem;
+}
+
+.barra-nome {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.barra-trilho {
+    display: block;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+}
+
+.barra-valor {
+    display: block;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 999px;
+}
+
+.barra-total {
+    text-align: right;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
 .placa-disponivel {
     color: #047857;
     background: #ecfdf5;

@@ -9,7 +9,8 @@
     </button>
     <div class="collapse navbar-collapse" id="menuPrincipal" [class.show]="menuAberto">
       <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-        <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="menuAberto = false">Veículos</a>
+        <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="menuAberto = false">Painel</a>
+        <a class="nav-link" routerLink="/veiculos" routerLinkActive="active" (click)="menuAberto = false">Veículos</a>
         <a class="nav-link" routerLink="/cadastros" routerLinkActive="active" (click)="menuAberto = false">Cadastros</a>
         <a class="nav-link" routerLink="/settings" routerLinkActive="active" (click)="menuAberto = false">Configurações</a>
         <span class="nav-user px-lg-2">{{ authService.usuario }}</span>
