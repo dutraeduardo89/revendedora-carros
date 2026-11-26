@@ -30,8 +30,8 @@ export const ROTULOS_CONSERVACAO: Record<string, string> = {
   ruim: 'Ruim',
 };
 
-export function anoCatalogoMin(anoAtual = new Date().getFullYear()): number {
-  return anoAtual - 40;
+export function anoCatalogoMin(_anoAtual = new Date().getFullYear()): number {
+  return 1950;
 }
 
 export function anoCatalogoMax(anoAtual = new Date().getFullYear()): number {
@@ -175,6 +175,28 @@ function inteiroInformado(valor: number | null): boolean {
   const texto = String(valor).trim();
   if (texto === '') return false;
   return Number.isInteger(Number(valor));
+}
+
+export function pendenciasVeiculo(carro: {
+  condicao?: string | null;
+  conservacao?: string | null;
+  categoria?: string | null;
+  combustivel?: string | null;
+  transmissao?: string | null;
+  motorizacao?: string | null;
+  portas?: number | null;
+  passageiros?: number | null;
+}): string[] {
+  const faltas: string[] = [];
+  if (!carro.condicao) faltas.push('classificação');
+  if (!carro.conservacao) faltas.push('conservação');
+  if (!carro.categoria) faltas.push('categoria');
+  if (!carro.combustivel) faltas.push('combustível');
+  if (!carro.transmissao) faltas.push('transmissão');
+  if (!carro.motorizacao) faltas.push('motorização');
+  if (carro.portas == null) faltas.push('portas');
+  if (carro.passageiros == null) faltas.push('passageiros');
+  return faltas;
 }
 
 export function validarVeiculo(

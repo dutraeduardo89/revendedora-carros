@@ -38,6 +38,7 @@ Todos os scripts em `backend/` usam `config.php` (conexão PDO, CORS, erro de ba
 | `backend/stats.php` | `GET` com total, disponíveis, reservados, vendidos e a contagem por classificação. |
 | `backend/configuracoes.php` | `GET` e `PUT` das faixas de classificação da conta. |
 | `backend/migrate.php` | Aplica no banco existente as colunas e a situação `R`, sem reclassificar os carros. |
+| `backend/popular.php` | Completa o catálogo e a frota do usuário `admin` sem apagar o que já existe. |
 | `backend/tests/regras_test.php` | Confere placa, anos e a sugestão de classificação. |
 | `backend/tests/fluxos_test.php` | Percorre login, catálogo, veículo, reserva e o bloqueio entre contas. |
 | `backend/logs/app.log` | Erros de PDO. A mensagem interna não volta para o navegador. |
@@ -50,7 +51,8 @@ Rotas em `frontend/src/app/app.routes.ts`. O menu fica em `app.html` e `app.ts`.
 | --- | --- | --- | --- |
 | `/` | Entrar | `login/login.ts`, `login/login.component.html` | Pede usuário e senha, guarda o token e abre o inventário. |
 | `/register` | Criar conta | `register/register.ts`, `register/register.html` | Cadastra o usuário e volta ao login. |
-| `/dashboard` | Inventário | `dashboard/dashboard.ts`, `dashboard/dashboard.html` | Lista os carros com placa, veículo, ano, km, valor e situação. Filtra por texto, situação, classificação, marca, cor, km e ano. A opção vazia do filtro é Nenhum. Marca e cor vêm do catálogo inteiro. A placa é verde, amarela ou vermelha. O detalhe abre o restante dos dados. |
+| `/dashboard` | Painel | `painel/painel.ts`, `painel/painel.html` | Mostra quantidade, valor médio, valor da coleção e gráficos de marcas, modelos, cores e acessórios. O aviso de cadastro incompleto abre a lista de carros e o que falta em cada um. |
+| `/veiculos` | Inventário | `dashboard/dashboard.ts`, `dashboard/dashboard.html` | Lista os carros com placa, veículo, ano, km, valor e situação. Filtra por texto, situação, classificação, marca, cor, km e ano. A opção vazia do filtro é Nenhum. Marca e cor vêm do catálogo inteiro. A placa é verde, amarela ou vermelha. O detalhe abre o restante dos dados. |
 | `/cadastrar` | Veículo | `car-form/car-form.ts`, `car-form/car-form.html` | Cria ou edita o carro. Com `?id=`, carrega o registro. Máscaras de placa, chassi, km e valor. A classificação sugerida usa km, idade e conservação. |
 | `/cadastros/marcas` | Marcas | `cadastros/cadastros.ts`, `cadastros/cadastros.html` | Uma seção por vez. Inclui, edita, exclui, filtra e ordena por nome ou por ID. |
 | `/cadastros/modelos` | Modelos | os mesmos arquivos | O modelo exige uma marca. A coluna mostra `marca_nome`. |
@@ -67,6 +69,7 @@ Arquivos que as telas compartilham:
 | `services/api.ts` | Chama cada PHP e envia o Bearer. Em 401, encerra a sessão. |
 | `services/auth.service.ts` | Guarda usuário e token no navegador. |
 | `services/erros.ts` | Traduz a resposta da API para a mensagem da tela. |
+| `aviso/aviso.ts` | Caixa fechada de aviso. O detalhe aparece quando a pessoa abre. |
 | `domain/vehicle-rules.ts` | As mesmas regras de placa, ano, km e classificação usadas antes de enviar o carro. |
 | `domain/formato.ts` | Máscaras de placa, chassi, quilometragem (`1.000`) e valor (`1.000,00`). |
 | `app.config.ts` | Locale `pt-BR`. |

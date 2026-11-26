@@ -5,13 +5,14 @@ import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../services/api';
 import { mensagemErro } from '../services/erros';
-import { ROTULOS_CONDICAO, ROTULOS_CONSERVACAO } from '../domain/vehicle-rules';
-import { mascaraKm, parseKm } from '../domain/formato';
+import { ROTULOS_CONDICAO, ROTULOS_CONSERVACAO, anoCatalogoMax, anoCatalogoMin, pendenciasVeiculo } from '../domain/vehicle-rules';
+import { limitarInteiro, mascaraKm, parseKm } from '../domain/formato';
+import { AvisoComponent } from '../aviso/aviso';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, AvisoComponent],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
@@ -230,6 +231,20 @@ export class DashboardComponent implements OnInit {
     if (condicao === 'usado') return 'text-bg-warning';
     if (condicao === 'velho') return 'text-bg-secondary';
     return 'text-bg-light';
+  }
+
+  get pendentes() {
+    return this.carros
+      .map((carro) => ({ ...carro, faltas: pendenciasVeiculo(carro).join(', ') }))
+      .filter((carro) => carro.faltas);
+  }
+
+  formatarAnoFiltro(campo: 'anoMin' | 'anoMax', evento: Event) {
+    const input = evento.target as HTMLInputElement;
+    const formatado = limitarInteiro(input.value, anoCatalogoMin(), anoCatalogoMax());
+    this.filtro[campo] = formatado === '' ? null : Number(formatado);
+    if (input.value !== formatado) input.value = formatado;
+    this.aplicarFiltros();
   }
 
   trackCarro(_index: number, carro: any) {

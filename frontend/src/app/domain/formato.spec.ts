@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { formatarValorPronto, mascaraChassi, mascaraKm, mascaraPlaca, mascaraValor, parseKm, parseValor } from './formato';
+import { formatarValorPronto, limitarInteiro, mascaraChassi, mascaraKm, mascaraPlaca, mascaraValor, parseKm, parseValor } from './formato';
 
 describe('máscaras de entrada', () => {
+  it('prende inteiros pequenos no intervalo permitido', () => {
+    expect(limitarInteiro('9', 2, 6)).toBe('6');
+    expect(limitarInteiro('1', 2, 6)).toBe('2');
+    expect(limitarInteiro('25', 1, 20)).toBe('20');
+    expect(limitarInteiro('1', 1, 20)).toBe('1');
+    expect(limitarInteiro('', 2, 6)).toBe('');
+  });
+
   it('aceita placa antiga e Mercosul e corta o que passa de 7', () => {
     expect(mascaraPlaca('abc-1d23')).toBe('ABC1D23');
     expect(mascaraPlaca('tgn2483xyz')).toBe('TGN2483');

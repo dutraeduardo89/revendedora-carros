@@ -10,18 +10,21 @@ import {
   TRANSMISSOES, VeiculoForm, anosDisponiveis, anosModelo, limitePassageiros, motivoCondicao,
   sugerirCondicao, validarVeiculo, veiculoVazio, type RegrasClassificacao,
 } from '../domain/vehicle-rules';
-import { formatarValorPronto, mascaraChassi, mascaraKm, mascaraPlaca, mascaraValor, parseKm, parseValor } from '../domain/formato';
+import { formatarValorPronto, limitarInteiro, mascaraChassi, mascaraKm, mascaraPlaca, mascaraValor, parseKm, parseValor } from '../domain/formato';
+import { AvisoComponent } from '../aviso/aviso';
 
 @Component({
   selector: 'app-car-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AvisoComponent],
   templateUrl: './car-form.html',
 })
 export class CarFormComponent implements OnInit {
   carro: VeiculoForm = veiculoVazio();
   kmTexto = '';
   valorTexto = '';
+  portasTexto = '';
+  passageirosTexto = '';
   idCarro: number | null = null;
   marcas: any[] = [];
   modelos: any[] = [];
@@ -109,6 +112,17 @@ export class CarFormComponent implements OnInit {
     return this.erros[campo] || '';
   }
 
+  get listaErros() {
+    const rotulos: Record<string, string> = {
+      placa: 'Placa', chassi: 'Chassi', cor: 'Cor', id_modelo: 'Modelo', categoria: 'Categoria',
+      combustivel: 'Combustível', transmissao: 'Transmissão', motorizacao: 'Motorização',
+      portas: 'Portas', passageiros: 'Passageiros', ano_fabricacao: 'Ano de fabricação',
+      ano_modelo: 'Ano-modelo', quilometragem: 'Quilometragem', valor: 'Valor',
+      situacao: 'Situação', conservacao: 'Conservação', condicao: 'Classificação', historico: 'Histórico',
+    };
+    return Object.entries(this.erros).map(([campo, texto]) => ({ campo: rotulos[campo] || campo, texto }));
+  }
+
   carregarVeiculo(id: number) {
     this.api.getCarro(id).subscribe({
       next: (carro) => {
@@ -159,6 +173,8 @@ export class CarFormComponent implements OnInit {
     }
     this.kmTexto = this.carro.quilometragem != null ? mascaraKm(String(this.carro.quilometragem)) : '';
     this.valorTexto = this.carro.valor != null ? formatarValorPronto(Number(this.carro.valor)) : '';
+    this.portasTexto = this.carro.portas != null ? String(this.carro.portas) : '';
+    this.passageirosTexto = this.carro.passageiros != null ? String(this.carro.passageiros) : '';
     this.classificacaoManual = !!this.carro.condicao;
     this.atualizarSugestao(false);
   }
@@ -183,6 +199,20 @@ export class CarFormComponent implements OnInit {
     this.escreverMascara(evento, mascaraValor, (valor) => {
       this.valorTexto = valor;
       this.carro.valor = parseValor(valor);
+    });
+  }
+
+  aoDigitarPortas(evento: Event) {
+    this.escreverMascara(evento, (valor) => limitarInteiro(valor, 2, 6), (valor) => {
+      this.portasTexto = valor;
+      this.carro.portas = valor === '' ? null : Number(valor);
+    });
+  }
+
+  aoDigitarPassageiros(evento: Event) {
+    this.escreverMascara(evento, (valor) => limitarInteiro(valor, 1, this.tetoPassageiros), (valor) => {
+      this.passageirosTexto = valor;
+      this.carro.passageiros = valor === '' ? null : Number(valor);
     });
   }
 
@@ -222,6 +252,7 @@ export class CarFormComponent implements OnInit {
   aoMudarCategoria() {
     if (this.carro.passageiros != null && this.carro.passageiros > this.tetoPassageiros) {
       this.carro.passageiros = this.tetoPassageiros;
+      this.passageirosTexto = String(this.tetoPassageiros);
     }
   }
 

@@ -1,0 +1,67 @@
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+  <div>
+    <h2 class="fw-bold mb-1">Painel</h2>
+    <p class="text-muted mb-0">Resumo da coleção da sua conta.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="/veiculos">Ver veículos</a>
+</div>
+
+<div *ngIf="erro" class="alert alert-danger" role="alert">
+  {{ erro }}
+  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button>
+</div>
+
+<div *ngIf="loading" class="text-center my-5 py-5">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando</span></div>
+</div>
+
+<ng-container *ngIf="!loading && !erro">
+  <app-aviso *ngIf="pendentes.length" titulo="Veículos sem classificação completa" [contagem]="pendentes.length">
+    <p class="mb-2">Estes carros foram salvos antes do cadastro completo. Abra cada um e informe os campos que faltam. A classificação depende de quilometragem, ano de fabricação e conservação.</p>
+    <ul class="aviso-lista">
+      <li *ngFor="let carro of pendentes">
+        <div>
+          <strong>{{ carro.placa }}</strong>
+          <span class="text-muted"> {{ carro.modelo }}</span>
+          <div class="small">Falta: {{ carro.faltas }}.</div>
+        </div>
+        <a [routerLink]="['/cadastrar']" [queryParams]="{ id: carro.id_carro }">Completar</a>
+      </li>
+    </ul>
+  </app-aviso>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Veículos</div><div class="fs-4 fw-bold">{{ total }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Valor médio</div><div class="fs-4 fw-bold">{{ valorMedio | currency:'BRL' }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">Valor da coleção</div><div class="fs-4 fw-bold">{{ valorTotal | currency:'BRL' }}</div></div></div>
+    <div class="col-6 col-lg-3">
+      <div class="card p-3 h-100">
+        <div class="text-muted small">Situação</div>
+        <div class="small mt-2">Disponíveis {{ disponiveis }}</div>
+        <div class="small">Reservados {{ reservados }}</div>
+        <div class="small">Vendidos {{ vendidos }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3" *ngIf="total; else vazio">
+    <div class="col-lg-6" *ngFor="let grupo of grupos">
+      <div class="card p-4 h-100">
+        <h3 class="h6 fw-bold">{{ grupo.titulo }}</h3>
+        <p class="text-muted small" *ngIf="!grupo.itens.length">Nenhum registro.</p>
+        <div class="barra-linha" *ngFor="let item of grupo.itens">
+          <span class="barra-nome">{{ item.nome }}</span>
+          <span class="barra-trilho"><span class="barra-valor" [style.width.%]="item.pct"></span></span>
+          <span class="barra-total">{{ item.total }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #vazio>
+    <div class="card p-5 text-center">
+      <h3 class="h5">Nenhum veículo na coleção</h3>
+      <p class="text-muted">Cadastre o primeiro carro para ver os gráficos.</p>
+      <a class="btn btn-primary" routerLink="/cadastrar">Novo veículo</a>
+    </div>
+  </ng-template>
+</ng-container>
